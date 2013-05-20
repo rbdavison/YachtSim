@@ -43,6 +43,7 @@
             this.trackBarIconSize = new System.Windows.Forms.TrackBar();
             this.listBoxYachts = new System.Windows.Forms.ListBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.openFileDialogFvw = new System.Windows.Forms.OpenFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarIconSize)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -189,6 +190,12 @@
             this.splitContainer1.SplitterDistance = 145;
             this.splitContainer1.TabIndex = 8;
             // 
+            // openFileDialogFvw
+            // 
+            this.openFileDialogFvw.FileName = "fvw.exe";
+            this.openFileDialogFvw.Filter = "FalconView|fvw.exe";
+            this.openFileDialogFvw.InitialDirectory = "C:\\";
+            // 
             // EyeInTheSkyForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -231,6 +238,7 @@
         private System.Windows.Forms.TrackBar trackBarIconSize;
         private System.Windows.Forms.ListBox listBoxYachts;
         private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.OpenFileDialog openFileDialogFvw;
     }
 }
 

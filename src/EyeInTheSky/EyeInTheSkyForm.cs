@@ -470,6 +470,16 @@ namespace EyeInTheSky
             }
         }
 
+        private void SaveToConfig(string configItem, string value)
+        {
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            AppSettingsSection app = config.AppSettings;
+            app.Settings.Remove(configItem);
+            app.Settings.Add(configItem, value);
+            config.Save(ConfigurationSaveMode.Modified);
+            ConfigurationManager.RefreshSection("appSettings");
+        }
+
         private void SendToServer(string message)
         {
             ASCIIEncoding encoder = new ASCIIEncoding();
@@ -510,16 +520,24 @@ namespace EyeInTheSky
             // Make sure FalconView is running. We do this so we can set it to full screen.
             try
             {
+                string fvwExe = ConfigurationManager.AppSettings[Constants.CONFIG_FALCONVIEW_EXE];
+                if (string.IsNullOrEmpty(fvwExe) || !File.Exists(fvwExe))
+                {
+                    if (openFileDialogFvw.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    {
+                        fvwExe = openFileDialogFvw.FileName;
+                    }
+                }
                 string fvw = Constants.FALCONVIEW_PROCESS_NAME;
                 if (!ProcessIsRunning(fvw))
                 {
-                    string falconViewExe = Constants.FALCONVIEW_EXE_NAME;
                     Process falconViewProc = new Process();
-                    falconViewProc.StartInfo.FileName = falconViewExe;
+                    falconViewProc.StartInfo.FileName = fvwExe;
                     falconViewProc.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
                     falconViewProc.Start();
                     while (!falconViewProc.Responding) ;
                 }
+                SaveToConfig(Constants.CONFIG_FALCONVIEW_EXE, fvwExe);
             }
             catch
             {
