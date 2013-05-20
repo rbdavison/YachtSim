@@ -16,6 +16,8 @@ namespace YachtSim
 {
     public class YachtSimServer : IDisposable
     {
+        #region Constructors
+
         private Dictionary<int, IYacht> yachts = new Dictionary<int, IYacht>();
         private static volatile YachtSimServer _instance;
         private static object lockObject = new object();
@@ -52,6 +54,19 @@ namespace YachtSim
             this.KeepAlive = true;
             this.tcpListener = new TcpListener(IPAddress.Any, Convert.ToInt32(ConfigurationManager.AppSettings["ServerPort"]));
         }
+
+        #endregion
+
+        #region Events
+
+        internal event YachtListUpdatedHandler onYachtListUpdated;
+
+        protected virtual void YachtListUpdated()
+        {
+            if (onYachtListUpdated != null) onYachtListUpdated();
+        }
+
+        #endregion
 
         private string AddYacht(string simClass)
         {
@@ -94,6 +109,7 @@ namespace YachtSim
             {
                 yacht.Dispose();
             }
+            _instance = null;
         }
 
         private string GetHeading(int yachtId)
@@ -336,6 +352,7 @@ namespace YachtSim
                 {
                     case Constants.SERVER_COMMAND_ADD:
                         _instance.SendToClient(tcpClient, Constants.SERVER_REPLY_ADDED + _instance.AddYacht(command.ToUpperInvariant().Replace(Constants.SERVER_COMMAND_ADD + " ", "")));
+                        YachtListUpdated();
                         break;
                     case Constants.SERVER_COMMAND_QUIT:
                         _instance.KeepAlive = false;
@@ -411,6 +428,7 @@ namespace YachtSim
                 case Constants.SERVER_COMMAND_YACHT:
                     _instance.RemoveYacht(yachtId);
                     _instance.SendToClient(tcpClient, Constants.SERVER_REPLY_REMOVED + yachtId);
+                    YachtListUpdated();
                     break;
                 case Constants.SERVER_COMMAND_WAYPOINT:
                     int waypointIdRemove;

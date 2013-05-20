@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
+    <Compile Include="Delegates.cs" />
     <Compile Include="Enums\SimVersions.cs" />
     <Compile Include="RudderAngle.cs" />
     <Compile Include="YachtSimServerForm.cs">
@@ -101,15 +102,14 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="YachtSimIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Geospatial\Geospatial.csproj">
       <Project>{4DDC45EC-FE87-47E4-BC07-BAD3BC5C40B1}</Project>
       <Name>Geospatial</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="YachtSimIcon.ico" />
-  </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

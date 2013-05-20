@@ -1,3 +1,6 @@
+# Where the builds put the artifacts.
+YachtSim/
+
 #################
 ## Visual Studio
 #################

@@ -223,6 +223,89 @@ namespace EyeInTheSky
             }
         }
 
+        //private Bitmap GetMapImage()
+        //{
+        //    MapItem mapItem = comboBoxMapHandles.SelectedItem as MapItem;
+        //    if (mapItem != null)
+        //    {
+        //        short no_data = 0;
+        //        object dib = null;
+        //        object corners = null;
+        //        double azimuth = checkBoxNorthUp.Checked ? 0.0 : 360 - yachtList[selectedYacht].Heading;
+        //        int result = fvMap.CreateMap(yachtList[selectedYacht].Location.Latitude.TotalDegrees,
+        //                                     yachtList[selectedYacht].Location.Longitude.TotalDegrees,
+        //                                     2,
+        //                                     mapItem.Handle,
+        //                                     azimuth,
+        //                                     100,
+        //                                     0,
+        //                                     0.0,
+        //                                     (short)1,
+        //                                     pictureBoxMap.Width,
+        //                                     pictureBoxMap.Height,
+        //                                     (short)1,
+        //                                     ref no_data,
+        //                                     ref dib,
+        //                                     ref corners);
+        //        if (result == Constants.SUCCESS)
+        //        {
+        //            Array dib_array = (dib as Array);
+
+        //            int e4 = Convert.ToInt32(dib_array.GetValue(4));
+        //            int e5 = Convert.ToInt32(dib_array.GetValue(5));
+        //            int e6 = Convert.ToInt32(dib_array.GetValue(6));
+        //            int e7 = Convert.ToInt32(dib_array.GetValue(7));
+        //            int e8 = Convert.ToInt32(dib_array.GetValue(8));
+        //            int e9 = Convert.ToInt32(dib_array.GetValue(9));
+        //            int e10 = Convert.ToInt32(dib_array.GetValue(10));
+        //            int e11 = Convert.ToInt32(dib_array.GetValue(11));
+
+        //            int width = (e7 << 24) + (e6 << 16) + (e5 << 8) + e4;
+        //            int height = (e11 << 24) + (e10 << 16) + (e9 << 8) + e8;
+
+        //            // Get a pinned GC handle to the returned DIB bytes
+        //            System.Runtime.InteropServices.GCHandle handle =
+        //                System.Runtime.InteropServices.GCHandle.Alloc(dib, System.Runtime.InteropServices.GCHandleType.Pinned);
+
+        //            // Get a pointer to the DIB bytes
+        //            IntPtr handlePtr = handle.AddrOfPinnedObject();
+
+        //            // Get a pointer to the start of the image data within the DIB bytes.
+        //            // The image data starts 40 bytes into the DIB.
+        //            // This code is written to handle IntPtr instances that could be
+        //            // 32-bit or 64-bit.
+        //            IntPtr scan0 = (IntPtr.Size == 4) ?
+        //                new IntPtr(handlePtr.ToInt32() + 40) :
+        //                new IntPtr(handlePtr.ToInt64() + 40);
+
+        //            // Create a new bitmap object from the raw data
+        //            // This assumes a 3 bits per pixel RGB format
+        //            Bitmap bitmap = new Bitmap(width, height, width * 3, System.Drawing.Imaging.PixelFormat.Format24bppRgb, scan0);
+
+        //            // Rotate the image since the bitmap is
+        //            // originally created upside-down
+        //            bitmap.RotateFlip(RotateFlipType.Rotate180FlipX);
+
+        //            // Free the pinned GC handle for the DIB bytes
+        //            handle.Free();
+
+        //            //Array corners_array = (corners as Array);
+
+        //            //double ul_lat = Convert.ToDouble(corners_array.GetValue(2));
+        //            //double ul_lon = Convert.ToDouble(corners_array.GetValue(3));
+        //            //double lr_lat = Convert.ToDouble(corners_array.GetValue(6));
+        //            //double lr_lon = Convert.ToDouble(corners_array.GetValue(7));
+
+        //            //Coordinate center = new Coordinate(lat, lon);
+        //            //Coordinate upperLeft = new Coordinate(ul_lat, ul_lon);
+        //            //Coordinate lowerRight = new Coordinate(lr_lat, lr_lon);
+
+        //            return bitmap;
+        //        }
+        //    }
+        //    return null;
+        //}
+
         private bool ProcessIsRunning(string name)
         {
             if (name != null)
@@ -236,41 +319,6 @@ namespace EyeInTheSky
                 }
             }
             return false;
-        }
-
-        private void SendToServer(string message)
-        {
-            ASCIIEncoding encoder = new ASCIIEncoding();
-            byte[] buffer = encoder.GetBytes(message);
-            clientStream.Write(buffer, 0, buffer.Length);
-            clientStream.Flush();
-
-            buffer = new byte[4096];
-            int bytesRead;
-
-            bytesRead = 0;
-
-            try
-            {
-                //blocks until a client sends a message
-                bytesRead = clientStream.Read(buffer, 0, 4096);
-            }
-            catch
-            {
-                //a socket error has occured
-                return;
-            }
-
-            if (bytesRead == 0)
-            {
-                //the client has disconnected from the server
-                return;
-            }
-
-            //message has successfully been received
-            encoder = new ASCIIEncoding();
-            string command = encoder.GetString(buffer, 0, bytesRead);
-            ProcessCommand(command);
         }
 
         private void ProcessCommand(string command)
@@ -422,6 +470,94 @@ namespace EyeInTheSky
             }
         }
 
+        private void SendToServer(string message)
+        {
+            ASCIIEncoding encoder = new ASCIIEncoding();
+            byte[] buffer = encoder.GetBytes(message);
+            clientStream.Write(buffer, 0, buffer.Length);
+            clientStream.Flush();
+
+            buffer = new byte[4096];
+            int bytesRead;
+
+            bytesRead = 0;
+
+            try
+            {
+                //blocks until a client sends a message
+                bytesRead = clientStream.Read(buffer, 0, 4096);
+            }
+            catch
+            {
+                //a socket error has occured
+                return;
+            }
+
+            if (bytesRead == 0)
+            {
+                //the client has disconnected from the server
+                return;
+            }
+
+            //message has successfully been received
+            encoder = new ASCIIEncoding();
+            string command = encoder.GetString(buffer, 0, bytesRead);
+            ProcessCommand(command);
+        }
+
+        private bool StartFalconView()
+        {
+            // Make sure FalconView is running. We do this so we can set it to full screen.
+            try
+            {
+                string fvw = Constants.FALCONVIEW_PROCESS_NAME;
+                if (!ProcessIsRunning(fvw))
+                {
+                    string falconViewExe = Constants.FALCONVIEW_EXE_NAME;
+                    Process falconViewProc = new Process();
+                    falconViewProc.StartInfo.FileName = falconViewExe;
+                    falconViewProc.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+                    falconViewProc.Start();
+                    while (!falconViewProc.Responding) ;
+                }
+            }
+            catch
+            {
+                // But if fwv.exe isn't found this will fail. :-(
+            }
+
+            // Connect to FalconView
+            try
+            {
+                fvMap = new fvw.Map();
+                double lat = 0.0, lon = 0.0, rot = 0.0;
+                while (Constants.SUCCESS != fvMap.GetMapDisplay(ref lat, ref lon, ref rot, ref mapCategory, ref mapHandle, ref mapZoom, ref mapProj))
+                {
+                    System.Threading.Thread.Sleep(500);
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+            // Now add our layer to FalconView
+            try
+            {
+                fvLayer = new fvw.Layer();
+                fvCallback = new FvCallback();
+                Int32 result = fvLayer.RegisterWithMapServer(Constants.FALCONVIEW_LAYER_NAME, (int)this.Handle, fvCallback);
+                fvLayerHandle = fvLayer.CreateLayer(Constants.FALCONVIEW_LAYER_NAME);
+                fvLayer.Refresh(fvLayerHandle);
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         private void UpdateMap()
         {
             if (yachtList.ContainsKey(selectedYacht))
@@ -457,135 +593,6 @@ namespace EyeInTheSky
             }
         }
 
-        //private Bitmap GetMapImage()
-        //{
-        //    MapItem mapItem = comboBoxMapHandles.SelectedItem as MapItem;
-        //    if (mapItem != null)
-        //    {
-        //        short no_data = 0;
-        //        object dib = null;
-        //        object corners = null;
-        //        double azimuth = checkBoxNorthUp.Checked ? 0.0 : 360 - yachtList[selectedYacht].Heading;
-        //        int result = fvMap.CreateMap(yachtList[selectedYacht].Location.Latitude.TotalDegrees,
-        //                                     yachtList[selectedYacht].Location.Longitude.TotalDegrees,
-        //                                     2,
-        //                                     mapItem.Handle,
-        //                                     azimuth,
-        //                                     100,
-        //                                     0,
-        //                                     0.0,
-        //                                     (short)1,
-        //                                     pictureBoxMap.Width,
-        //                                     pictureBoxMap.Height,
-        //                                     (short)1,
-        //                                     ref no_data,
-        //                                     ref dib,
-        //                                     ref corners);
-        //        if (result == Constants.SUCCESS)
-        //        {
-        //            Array dib_array = (dib as Array);
-
-        //            int e4 = Convert.ToInt32(dib_array.GetValue(4));
-        //            int e5 = Convert.ToInt32(dib_array.GetValue(5));
-        //            int e6 = Convert.ToInt32(dib_array.GetValue(6));
-        //            int e7 = Convert.ToInt32(dib_array.GetValue(7));
-        //            int e8 = Convert.ToInt32(dib_array.GetValue(8));
-        //            int e9 = Convert.ToInt32(dib_array.GetValue(9));
-        //            int e10 = Convert.ToInt32(dib_array.GetValue(10));
-        //            int e11 = Convert.ToInt32(dib_array.GetValue(11));
-
-        //            int width = (e7 << 24) + (e6 << 16) + (e5 << 8) + e4;
-        //            int height = (e11 << 24) + (e10 << 16) + (e9 << 8) + e8;
-
-        //            // Get a pinned GC handle to the returned DIB bytes
-        //            System.Runtime.InteropServices.GCHandle handle =
-        //                System.Runtime.InteropServices.GCHandle.Alloc(dib, System.Runtime.InteropServices.GCHandleType.Pinned);
-
-        //            // Get a pointer to the DIB bytes
-        //            IntPtr handlePtr = handle.AddrOfPinnedObject();
-
-        //            // Get a pointer to the start of the image data within the DIB bytes.
-        //            // The image data starts 40 bytes into the DIB.
-        //            // This code is written to handle IntPtr instances that could be
-        //            // 32-bit or 64-bit.
-        //            IntPtr scan0 = (IntPtr.Size == 4) ?
-        //                new IntPtr(handlePtr.ToInt32() + 40) :
-        //                new IntPtr(handlePtr.ToInt64() + 40);
-
-        //            // Create a new bitmap object from the raw data
-        //            // This assumes a 3 bits per pixel RGB format
-        //            Bitmap bitmap = new Bitmap(width, height, width * 3, System.Drawing.Imaging.PixelFormat.Format24bppRgb, scan0);
-
-        //            // Rotate the image since the bitmap is
-        //            // originally created upside-down
-        //            bitmap.RotateFlip(RotateFlipType.Rotate180FlipX);
-
-        //            // Free the pinned GC handle for the DIB bytes
-        //            handle.Free();
-
-        //            //Array corners_array = (corners as Array);
-
-        //            //double ul_lat = Convert.ToDouble(corners_array.GetValue(2));
-        //            //double ul_lon = Convert.ToDouble(corners_array.GetValue(3));
-        //            //double lr_lat = Convert.ToDouble(corners_array.GetValue(6));
-        //            //double lr_lon = Convert.ToDouble(corners_array.GetValue(7));
-
-        //            //Coordinate center = new Coordinate(lat, lon);
-        //            //Coordinate upperLeft = new Coordinate(ul_lat, ul_lon);
-        //            //Coordinate lowerRight = new Coordinate(lr_lat, lr_lon);
-
-        //            return bitmap;
-        //        }
-        //    }
-        //    return null;
-        //}
-
-        private bool StartFalconView()
-        {
-            // Make sure FalconView is running. We do this so we can set it to full screen.
-            string fvw = Constants.FALCONVIEW_PROCESS_NAME;
-            if (!ProcessIsRunning(fvw))
-            {
-                string falconViewExe = Constants.FALCONVIEW_EXE_NAME;
-                Process falconViewProc = new Process();
-                falconViewProc.StartInfo.FileName = falconViewExe;
-                falconViewProc.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
-                falconViewProc.Start();
-                while (!falconViewProc.Responding) ;
-            }
-
-            // Connect to FalconView
-            try
-            {
-                fvMap = new fvw.Map();
-                double lat = 0.0, lon = 0.0, rot = 0.0;
-                while (Constants.SUCCESS != fvMap.GetMapDisplay(ref lat, ref lon, ref rot, ref mapCategory, ref mapHandle, ref mapZoom, ref mapProj))
-                {
-                    System.Threading.Thread.Sleep(500);
-                }
-            }
-            catch
-            {
-                return false;
-            }
-
-            // Now add our layer to FalconView
-            try
-            {
-                fvLayer = new fvw.Layer();
-                fvCallback = new FvCallback();
-                Int32 result = fvLayer.RegisterWithMapServer(Constants.FALCONVIEW_LAYER_NAME, (int)this.Handle, fvCallback);
-                fvLayerHandle = fvLayer.CreateLayer(Constants.FALCONVIEW_LAYER_NAME);
-                fvLayer.Refresh(fvLayerHandle);
-            }
-            catch
-            {
-                return false;
-            }
-
-            return true;
-        }
-
         private void UpdateYachtImage(int yachtId)
         {
             Bitmap background = new Bitmap(yachtList[yachtId].IconSize, yachtList[yachtId].IconSize, PixelFormat.Format32bppArgb);
@@ -597,7 +604,7 @@ namespace EyeInTheSky
                 gimage.TranslateTransform(background.Width / 2, background.Height / 2);
                 //if (checkBoxNorthUp.Checked)
                 //{
-                    gimage.RotateTransform(yachtList[yachtId].Heading);
+                gimage.RotateTransform(yachtList[yachtId].Heading);
                 //}
                 //else
                 //{
@@ -614,7 +621,7 @@ namespace EyeInTheSky
                 gimage.TranslateTransform(background.Width / 2, background.Height / 2);
                 //if (checkBoxNorthUp.Checked)
                 //{
-                    gimage.RotateTransform(yachtList[yachtId].SailDirection);
+                gimage.RotateTransform(yachtList[yachtId].SailDirection);
                 //}
                 //else
                 //{
@@ -631,7 +638,7 @@ namespace EyeInTheSky
                 gimage.TranslateTransform(background.Width / 2, background.Height / 2);
                 //if (checkBoxNorthUp.Checked)
                 //{
-                    gimage.RotateTransform(yachtList[yachtId].WindAngle);
+                gimage.RotateTransform(yachtList[yachtId].WindAngle);
                 //}
                 //else
                 //{

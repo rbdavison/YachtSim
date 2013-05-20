@@ -17,7 +17,7 @@ namespace YachtSim
     {
         #region Constructors
 
-        private YachtSimServer _simSail = YachtSimServer.GetInstance;
+        private YachtSimServer yachtSimServer = YachtSimServer.GetInstance;
 
         public YachtSimServerForm()
         {
@@ -33,8 +33,8 @@ namespace YachtSim
             if (listViewYachts.SelectedItems.Count == 1)
             {
                 int yacht = Convert.ToInt32(listViewYachts.SelectedItems[0].Text);
-                _simSail.RemoveYacht(yacht);
-                listViewYachts.Items.Remove(listViewYachts.SelectedItems[0]);
+                yachtSimServer.RemoveYacht(yacht);
+                UpdateYachtList();
             }
         }
 
@@ -45,7 +45,7 @@ namespace YachtSim
 
         private void numericUpDownWindSpeed_ValueChanged(object sender, EventArgs e)
         {
-            _simSail.Wind.Velocity = Convert.ToDouble(numericUpDownWindSpeed.Value);
+            yachtSimServer.Wind.Velocity = Convert.ToDouble(numericUpDownWindSpeed.Value);
         }
 
         private void numericUpDownWindDirection_ValueChanged(object sender, EventArgs e)
@@ -59,25 +59,25 @@ namespace YachtSim
                 numericUpDownWindDirection.Value = 359;
             }
 
-            _simSail.Wind.Direction = Angle.FromDegrees(Convert.ToDouble(numericUpDownWindDirection.Value));
+            yachtSimServer.Wind.Direction = Angle.FromDegrees(Convert.ToDouble(numericUpDownWindDirection.Value));
         }
 
         private void numericUpDownWindVariability_ValueChanged(object sender, EventArgs e)
         {
-            _simSail.Wind.DirectionVariability = Convert.ToInt32(numericUpDownWindVariability.Value);
+            yachtSimServer.Wind.DirectionVariability = Convert.ToInt32(numericUpDownWindVariability.Value);
         }
 
-        private void timerYachtsUpdater_Tick(object sender, EventArgs e)
+        private void yachtSimServer_onYachtListUpdated()
         {
             UpdateYachtList();
         }
 
         private void YachtSimServerForm_Load(object sender, EventArgs e)
         {
-            numericUpDownWindDirection.Value = Convert.ToDecimal(_simSail.Wind.Direction.Degrees);
-            numericUpDownWindSpeed.Value = Convert.ToDecimal(_simSail.Wind.Velocity);
-            numericUpDownWindVariability.Value = Convert.ToDecimal(_simSail.Wind.DirectionVariability);
-            timerYachtsUpdater.Start();
+            numericUpDownWindDirection.Value = Convert.ToDecimal(yachtSimServer.Wind.Direction.Degrees);
+            numericUpDownWindSpeed.Value = Convert.ToDecimal(yachtSimServer.Wind.Velocity);
+            numericUpDownWindVariability.Value = Convert.ToDecimal(yachtSimServer.Wind.DirectionVariability);
+            yachtSimServer.onYachtListUpdated += new YachtListUpdatedHandler(yachtSimServer_onYachtListUpdated);
         }
 
         private void YachtSimServerForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -91,8 +91,19 @@ namespace YachtSim
 
         private void Quit()
         {
+            // We send a quit message to the server because the server is busy listening for client connections.
             TcpClient client = new TcpClient();
-            IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Parse(ConfigurationManager.AppSettings["ServerIP"]), Convert.ToInt32(ConfigurationManager.AppSettings["ServerPort"]));
+            string serverIP = ConfigurationManager.AppSettings["ServerIP"];
+            if (string.IsNullOrEmpty(serverIP))
+            {
+                serverIP = "127.0.0.1";
+            }
+            string serverPort = ConfigurationManager.AppSettings["ServerPort"];
+            if (string.IsNullOrEmpty(serverPort))
+            {
+                serverPort = "3000";
+            }
+            IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Parse(serverIP), Convert.ToInt32(serverPort));
             client.Connect(serverEndPoint);
             NetworkStream clientStream = client.GetStream();
             ASCIIEncoding encoder = new ASCIIEncoding();
@@ -112,7 +123,7 @@ namespace YachtSim
             clientStream.Close();
             client.Close();
 
-            _simSail.Dispose();
+            yachtSimServer.Dispose();
         }
 
         private void UpdateYachtList()

@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(YachtSimServerForm));
             this.buttonQuit = new System.Windows.Forms.Button();
             this.numericUpDownWindSpeed = new System.Windows.Forms.NumericUpDown();
@@ -40,9 +39,8 @@
             this.listViewYachts = new System.Windows.Forms.ListView();
             this.columnHeaderId = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.timerYachtsUpdater = new System.Windows.Forms.Timer(this.components);
-            this.label1 = new System.Windows.Forms.Label();
             this.columnHeaderName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownWindSpeed)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownWindDirection)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownWindVariability)).BeginInit();
@@ -169,11 +167,10 @@
             this.columnHeaderType.Text = "Simulator";
             this.columnHeaderType.Width = 100;
             // 
-            // timerYachtsUpdater
+            // columnHeaderName
             // 
-            this.timerYachtsUpdater.Enabled = true;
-            this.timerYachtsUpdater.Interval = 10000;
-            this.timerYachtsUpdater.Tick += new System.EventHandler(this.timerYachtsUpdater_Tick);
+            this.columnHeaderName.Text = "Name";
+            this.columnHeaderName.Width = 242;
             // 
             // label1
             // 
@@ -183,11 +180,6 @@
             this.label1.Size = new System.Drawing.Size(173, 13);
             this.label1.TabIndex = 13;
             this.label1.Text = "Wind Direction Variability (Degrees)";
-            // 
-            // columnHeaderName
-            // 
-            this.columnHeaderName.Text = "Name";
-            this.columnHeaderName.Width = 242;
             // 
             // YachtSimServerForm
             // 
@@ -227,7 +219,6 @@
         private System.Windows.Forms.NumericUpDown numericUpDownWindVariability;
         private System.Windows.Forms.ListView listViewYachts;
         private System.Windows.Forms.ColumnHeader columnHeaderId;
-        private System.Windows.Forms.Timer timerYachtsUpdater;
         private System.Windows.Forms.ColumnHeader columnHeaderType;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ColumnHeader columnHeaderName;
