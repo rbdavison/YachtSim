@@ -188,9 +188,12 @@ namespace Tracksail
 
         private void UpdateApparentWind()
         {
-            this.currentWindAngle = YachtSimServer.Wind.Direction;
+            if (YachtSimServer != null && YachtSimServer.Wind != null)
+            {
+                this.currentWindAngle = YachtSimServer.Wind.Direction;
+                this.currentWindVelocity = YachtSimServer.Wind.Velocity;
+            }
             this.ApparentWindAngle = this.currentWindAngle;
-            this.currentWindVelocity = YachtSimServer.Wind.Velocity;
             this.ApparentWindVelocity = this.currentWindVelocity;
             // A = SquareRoot(W^2 + V^2 + 2WV cos alpha)
             // A = Apparent wind

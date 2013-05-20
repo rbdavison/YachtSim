@@ -1,5 +1,7 @@
 # Where the builds put the artifacts.
 YachtSim/
+# Versioned builds copied ready to copy to the server
+YachtSim-*
 
 #################
 ## Visual Studio

@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Geospatial;
 using System.IO;
+using System.Windows.Forms;
 
 namespace EyeInTheSky
 {
@@ -44,7 +45,7 @@ namespace EyeInTheSky
             get
             {
                 string northTag = NorthUp ? "-NorthUp" : "";
-                string fileName = Path.Combine(Environment.CurrentDirectory,
+                string fileName = Path.Combine(Application.StartupPath,
                                     Id.ToString(),
                                     Convert.ToInt32(Heading).ToString(),
                                     Convert.ToInt32(SailDirection).ToString(),
